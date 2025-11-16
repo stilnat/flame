@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/src/events/flame_drag_adapter.dart';
+import 'package:flame/src/events/flame_game_mixins/scale_dispatcher.dart';
 import 'package:flame/src/events/tagged_component.dart';
 import 'package:flame/src/game/flame_game.dart';
 import 'package:flame/src/game/game_render_box.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 
@@ -52,7 +54,15 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
 
   Stream<DragCancelEvent> get onCancel => _dragCancelController.stream;
 
+  ScaleDispatcher? _scaleDispatcher;
+
   FlameGame get game => parent! as FlameGame;
+
+  ScaleUpdateDetails? lastScaleUpdate;
+  ScaleUpdateDetails? lastScaleStart;
+  ScaleUpdateDetails? lastScaleEnd;
+
+  int _scaleGestureId = 0;
 
   /// Called when the user initiates a drag gesture, for example by touching the
   /// screen and then moving the finger.
@@ -173,6 +183,19 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
         instance.onStart = (Offset point) => FlameDragAdapter(this, point);
       },
     );
+    final existingDispatcher = game.findByKey(const ScaleDispatcherKey());
+    if (existingDispatcher != null) {
+      _attachScaleDispatcher(existingDispatcher as ScaleDispatcher);
+    }
+  }
+
+  @override
+  void onChildrenChanged(Component child, ChildrenChangeType type) {
+    super.onChildrenChanged(child, type);
+
+    if (type == ChildrenChangeType.added && child is ScaleDispatcher) {
+      _attachScaleDispatcher(child);
+    }
   }
 
   @override
@@ -187,4 +210,42 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
 
   @override
   GameRenderBox get renderBox => game.renderBox;
+
+  void _attachScaleDispatcher(ScaleDispatcher newDispatcher) {
+    if (_scaleDispatcher != null) {
+      return;
+    }
+
+    _scaleDispatcher = newDispatcher;
+    listenToScaleDispatcher(newDispatcher);
+  }
+
+    /// Subscribe to an external Scale Dispatcher, we need
+  /// this in order to get the data of pointers used by
+  /// [ScaleGestureRecognizer], as it is necessary
+  /// to compute things such as rotation and scale of the scale gesture.
+  void listenToScaleDispatcher(ScaleDispatcher scaleDispatcher) {
+    scaleDispatcher.onUpdate.listen((event) {
+      if(event.raw.pointerCount != 1){
+        return;
+      }
+      lastScaleUpdate = event.raw;
+      onDragUpdate(DragUpdateEvent.fromScale(_scaleGestureId, game, event.raw));
+    });
+    scaleDispatcher.onStart.listen((event) {
+      
+      if(event.raw.pointerCount != 1){
+        return;
+      }
+      debugPrint("start scale listen");
+      _scaleGestureId = PointerId.next();
+      onDragStart(DragStartEvent.fromScale(_scaleGestureId, game, event.raw));
+    });
+    scaleDispatcher.onEnd.listen((event) {
+      if(event.raw.pointerCount != 1){
+        return;
+      }
+      onDragEnd(DragEndEvent.fromScale(_scaleGestureId, event.raw));
+    });
+  }
 }

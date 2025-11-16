@@ -1,4 +1,5 @@
 import 'package:flame/extensions.dart';
+import 'package:flame/game.dart';
 import 'package:flame/src/events/messages/drag_end_event.dart';
 import 'package:flame/src/events/messages/drag_update_event.dart';
 import 'package:flame/src/events/messages/position_event.dart';
@@ -15,6 +16,20 @@ class DragStartEvent extends PositionEvent<DragStartDetails> {
         raw: details,
         devicePosition: details.globalPosition.toVector2(),
       );
+
+  /// Constructor that builds a DragStartEvent from a ScaleStartDetails.
+  DragStartEvent.fromScale(
+    this.pointerId,
+    FlameGame game,
+    ScaleStartDetails details,
+  )   : deviceKind = details.kind ?? PointerDeviceKind.unknown,
+        super(
+          game,
+          raw: DragStartDetails(globalPosition: details.focalPoint,
+           localPosition: details.localFocalPoint,
+           sourceTimeStamp: details.sourceTimeStamp, kind: details.kind),
+          devicePosition: details.focalPoint.toVector2(),
+        );
 
   /// The unique identifier of the drag event.
   ///

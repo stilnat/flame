@@ -13,7 +13,6 @@ class FlameDragAdapter implements Drag {
 
   final MultiDragListener _listener;
   late final int _id;
-  static int _globalIdCounter = 0;
 
   void start(Offset point) {
     final event = DragStartDetails(
@@ -21,7 +20,7 @@ class FlameDragAdapter implements Drag {
       globalPosition: point,
       localPosition: _listener.renderBox.globalToLocal(point),
     );
-    _id = _globalIdCounter++;
+    _id = PointerId.next();
     _listener.handleDragStart(_id, event);
   }
 
@@ -34,4 +33,16 @@ class FlameDragAdapter implements Drag {
 
   @override
   void cancel() => _listener.handleDragCancel(_id);
+}
+
+class PointerId {
+  static int _pointerId = 0;
+
+  static int next() {
+    return _pointerId++;
+  }
+
+  static void reset() {
+    _pointerId = 0;
+  }
 }

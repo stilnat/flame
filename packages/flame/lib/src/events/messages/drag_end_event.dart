@@ -7,6 +7,15 @@ class DragEndEvent extends Event<DragEndDetails> {
     : velocity = details.velocity.pixelsPerSecond.toVector2(),
       super(raw: details);
 
+  /// Constructor that builds a DragEndEvent from a ScaleEndDetails.
+  DragEndEvent.fromScale(
+    this.pointerId,
+    ScaleEndDetails details,
+  )   : velocity = details.velocity.pixelsPerSecond.toVector2(),
+        super(raw: DragEndDetails(
+          velocity: details.velocity,
+        ));
+
   final int pointerId;
 
   final Vector2 velocity;

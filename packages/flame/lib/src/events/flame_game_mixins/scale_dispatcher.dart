@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flame/components.dart';
@@ -64,6 +65,24 @@ class ScaleDispatcher extends Component implements ScaleListener {
 
   MultiDragDispatcher? _multiDragDispatcher;
 
+  final _scaleUpdateController = StreamController<ScaleUpdateEvent>.broadcast(
+    sync: true,
+  );
+
+  Stream<ScaleUpdateEvent> get onUpdate => _scaleUpdateController.stream;
+
+  final _scaleStartController = StreamController<ScaleStartEvent>.broadcast(
+    sync: true,
+  );
+
+  Stream<ScaleStartEvent> get onStart => _scaleStartController.stream;
+
+  final _scaleEndController = StreamController<ScaleEndEvent>.broadcast(
+    sync: true,
+  );
+
+  Stream<ScaleEndEvent> get onEnd => _scaleEndController.stream;
+
   /// Called when the user starts a scale gesture.
   @mustCallSuper
   void onScaleStart(ScaleStartEvent event) {
@@ -122,20 +141,26 @@ class ScaleDispatcher extends Component implements ScaleListener {
   @internal
   @override
   void handleScaleStart(ScaleStartDetails details) {
-    onScaleStart(ScaleStartEvent(0, game, details));
+    final event = ScaleStartEvent(0, game, details);
+    onScaleStart(event);
+    _scaleStartController.add(event);
   }
 
   @internal
   @override
   void handleScaleUpdate(ScaleUpdateDetails details) {
     if (details.pointerCount != 1) {
-      onScaleUpdate(ScaleUpdateEvent(0, game, details));
+      final event = ScaleUpdateEvent(0, game, details);
+      _scaleUpdateController.add(event);
+      onScaleUpdate(event);
       return;
     }
 
     final newDetails = _buildNewUpdateDetails(details);
     if (newDetails != null) {
-      onScaleUpdate(ScaleUpdateEvent(0, game, newDetails));
+      final event = ScaleUpdateEvent(0, game, newDetails);
+       _scaleUpdateController.add(event);
+      onScaleUpdate(event);
     }
   }
 
@@ -289,7 +314,9 @@ class ScaleDispatcher extends Component implements ScaleListener {
   void handleScaleEnd(ScaleEndDetails details) {
     _currentLine = null;
     _lineAtFirstUpdate = null;
-    onScaleEnd(ScaleEndEvent(0, details));
+    final event = ScaleEndEvent(0, details);
+    onScaleEnd(event);
+    _scaleEndController.add(event);
   }
 
   //#endregion
