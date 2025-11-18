@@ -159,7 +159,7 @@ class ScaleDispatcher extends Component implements ScaleListener {
     final newDetails = _buildNewUpdateDetails(details);
     if (newDetails != null) {
       final event = ScaleUpdateEvent(0, game, newDetails);
-       _scaleUpdateController.add(event);
+      _scaleUpdateController.add(event);
       onScaleUpdate(event);
     }
   }

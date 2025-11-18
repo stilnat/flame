@@ -22,14 +22,17 @@ class DragStartEvent extends PositionEvent<DragStartDetails> {
     this.pointerId,
     FlameGame game,
     ScaleStartDetails details,
-  )   : deviceKind = details.kind ?? PointerDeviceKind.unknown,
-        super(
-          game,
-          raw: DragStartDetails(globalPosition: details.focalPoint,
-           localPosition: details.localFocalPoint,
-           sourceTimeStamp: details.sourceTimeStamp, kind: details.kind),
-          devicePosition: details.focalPoint.toVector2(),
-        );
+  ) : deviceKind = details.kind ?? PointerDeviceKind.unknown,
+      super(
+        game,
+        raw: DragStartDetails(
+          globalPosition: details.focalPoint,
+          localPosition: details.localFocalPoint,
+          sourceTimeStamp: details.sourceTimeStamp,
+          kind: details.kind,
+        ),
+        devicePosition: details.focalPoint.toVector2(),
+      );
 
   /// The unique identifier of the drag event.
   ///

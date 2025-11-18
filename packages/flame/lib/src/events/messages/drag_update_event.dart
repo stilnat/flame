@@ -16,24 +16,24 @@ class DragUpdateEvent extends DisplacementEvent<DragUpdateDetails> {
   final int pointerId;
   final Duration timestamp;
 
-    /// Constructor that builds a DragUpdateEvent from a ScaleUpdateDetails.
+  /// Constructor that builds a DragUpdateEvent from a ScaleUpdateDetails.
   DragUpdateEvent.fromScale(
     this.pointerId,
     FlameGame game,
     ScaleUpdateDetails details,
-  )   : timestamp = details.sourceTimeStamp ?? Duration.zero,
-        super(
-          game,
-          raw: DragUpdateDetails(
-            globalPosition: details.focalPoint,
-            localPosition: details.localFocalPoint,
-            delta: details.focalPointDelta,
-            sourceTimeStamp: details.sourceTimeStamp,
-          ),
-          deviceStartPosition: details.focalPoint.toVector2(),
-          deviceEndPosition: 
-          (details.focalPoint + details.focalPointDelta).toVector2(),
-        );
+  ) : timestamp = details.sourceTimeStamp ?? Duration.zero,
+      super(
+        game,
+        raw: DragUpdateDetails(
+          globalPosition: details.focalPoint,
+          localPosition: details.localFocalPoint,
+          delta: details.focalPointDelta,
+          sourceTimeStamp: details.sourceTimeStamp,
+        ),
+        deviceStartPosition: details.focalPoint.toVector2(),
+        deviceEndPosition: (details.focalPoint + details.focalPointDelta)
+            .toVector2(),
+      );
 
   @override
   String toString() =>

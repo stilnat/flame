@@ -229,11 +229,11 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
   /// [ScaleGestureRecognizer], as it is necessary to reconstruct
   /// from it drag data, using the focal point. When a single
   /// pointer (finger) is involved it just happens that the focal
-  /// position is equivalent to the pointer position so it's 
+  /// position is equivalent to the pointer position so it's
   /// pretty straightforward to go from one to the other.
   void listenToScaleDispatcher(ScaleDispatcher scaleDispatcher) {
     scaleDispatcher.onStart.listen((event) {
-      if(event.raw.pointerCount != 1){
+      if (event.raw.pointerCount != 1) {
         return;
       }
       _scaleGestureId = PointerId.next();
@@ -242,27 +242,26 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
     });
 
     scaleDispatcher.onUpdate.listen((event) {
-      if(event.raw.pointerCount != 1){
+      if (event.raw.pointerCount != 1) {
         return;
       }
       lastScaleUpdate = event.raw;
-     
-     // For some reason I could not determine, the value of the first focal 
-     // delta used to compute the drag delta is completely wrong, this is
-     // most certainly an issue with [ScaleGestureRecognizer] itself.
-     // The solution chosen is simply to ignore that first update focal
-     // delta. This introduce a small delay in the response to user input,
-     // I considered here that one update delay was acceptable.
-     if(ignoreFirstFocal){
-      ignoreFirstFocal = false;
-      return;
-     }
-    onDragUpdate(DragUpdateEvent.fromScale(_scaleGestureId, game, event.raw));
+
+      // For some reason I could not determine, the value of the first focal
+      // delta used to compute the drag delta is completely wrong, this is
+      // most certainly an issue with [ScaleGestureRecognizer] itself.
+      // The solution chosen is simply to ignore that first update focal
+      // delta. This introduce a small delay in the response to user input,
+      // I considered here that one update delay was acceptable.
+      if (ignoreFirstFocal) {
+        ignoreFirstFocal = false;
+        return;
+      }
+      onDragUpdate(DragUpdateEvent.fromScale(_scaleGestureId, game, event.raw));
     });
 
     scaleDispatcher.onEnd.listen((event) {
-      
-      if(event.raw.pointerCount != 1){
+      if (event.raw.pointerCount != 1) {
         return;
       }
       onDragEnd(DragEndEvent.fromScale(_scaleGestureId, event.raw));

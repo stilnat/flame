@@ -11,10 +11,12 @@ class DragEndEvent extends Event<DragEndDetails> {
   DragEndEvent.fromScale(
     this.pointerId,
     ScaleEndDetails details,
-  )   : velocity = details.velocity.pixelsPerSecond.toVector2(),
-        super(raw: DragEndDetails(
+  ) : velocity = details.velocity.pixelsPerSecond.toVector2(),
+      super(
+        raw: DragEndDetails(
           velocity: details.velocity,
-        ));
+        ),
+      );
 
   final int pointerId;
 
