@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -9,6 +10,7 @@ import 'package:flame/src/game/flame_game.dart';
 import 'package:flame/src/game/game_render_box.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 class MultiDragDispatcherKey implements ComponentKey {
@@ -220,28 +222,46 @@ class MultiDragDispatcher extends Component implements MultiDragListener {
     listenToScaleDispatcher(newDispatcher);
   }
 
-    /// Subscribe to an external Scale Dispatcher, we need
+  bool ignoreFirstFocal = true;
+
+  /// Subscribe to an external Scale Dispatcher, we need
   /// this in order to get the data of pointers used by
-  /// [ScaleGestureRecognizer], as it is necessary
-  /// to compute things such as rotation and scale of the scale gesture.
+  /// [ScaleGestureRecognizer], as it is necessary to reconstruct
+  /// from it drag data, using the focal point. When a single
+  /// pointer (finger) is involved it just happens that the focal
+  /// position is equivalent to the pointer position so it's 
+  /// pretty straightforward to go from one to the other.
   void listenToScaleDispatcher(ScaleDispatcher scaleDispatcher) {
+    scaleDispatcher.onStart.listen((event) {
+      if(event.raw.pointerCount != 1){
+        return;
+      }
+      _scaleGestureId = PointerId.next();
+      ignoreFirstFocal = true;
+      onDragStart(DragStartEvent.fromScale(_scaleGestureId, game, event.raw));
+    });
+
     scaleDispatcher.onUpdate.listen((event) {
       if(event.raw.pointerCount != 1){
         return;
       }
       lastScaleUpdate = event.raw;
-      onDragUpdate(DragUpdateEvent.fromScale(_scaleGestureId, game, event.raw));
+     
+     // For some reason I could not determine, the value of the first focal 
+     // delta used to compute the drag delta is completely wrong, this is
+     // most certainly an issue with [ScaleGestureRecognizer] itself.
+     // The solution chosen is simply to ignore that first update focal
+     // delta. This introduce a small delay in the response to user input,
+     // I considered here that one update delay was acceptable.
+     if(ignoreFirstFocal){
+      ignoreFirstFocal = false;
+      return;
+     }
+    onDragUpdate(DragUpdateEvent.fromScale(_scaleGestureId, game, event.raw));
     });
-    scaleDispatcher.onStart.listen((event) {
-      
-      if(event.raw.pointerCount != 1){
-        return;
-      }
-      debugPrint("start scale listen");
-      _scaleGestureId = PointerId.next();
-      onDragStart(DragStartEvent.fromScale(_scaleGestureId, game, event.raw));
-    });
+
     scaleDispatcher.onEnd.listen((event) {
+      
       if(event.raw.pointerCount != 1){
         return;
       }

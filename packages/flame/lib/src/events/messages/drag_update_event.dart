@@ -25,8 +25,8 @@ class DragUpdateEvent extends DisplacementEvent<DragUpdateDetails> {
         super(
           game,
           raw: DragUpdateDetails(
-            globalPosition: details.focalPoint * 2,
-            localPosition: details.localFocalPoint * 2,
+            globalPosition: details.focalPoint,
+            localPosition: details.localFocalPoint,
             delta: details.focalPointDelta,
             sourceTimeStamp: details.sourceTimeStamp,
           ),
